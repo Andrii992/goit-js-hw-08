@@ -22,7 +22,7 @@ player
         break;
 
       default:
-        // some other error occurred
+        // some other error
         break;
     }
   });
