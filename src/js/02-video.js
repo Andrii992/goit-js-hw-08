@@ -1,34 +1,28 @@
-import '../css/common.css';
+import throttle from 'lodash.throttle';
 import Player from '@vimeo/player';
-import { throttle } from 'lodash';
 
-const TIME_KEY = 'videoplayer-current-time';
-const iframe = document.querySelector('iframe');
-const player = new Vimeo.Player(iframe);
+const vimeo = document.getElementById('vimeo-player');
+const player = new Player(vimeo);
 
-const onPlay = function (data) {
-  const strigifyData = JSON.stringify(data);
-  localStorage.setItem(TIME_KEY, strigifyData);
-};
-player.on('timeupdate', throttle(onPlay, 1000));
+player.on('timeupdate', throttle(timeUpdate, 1000));
 
-function resumePlayback() {
-  if (JSON.parse(localStorage.getItem(TIME_KEY)) === null) {
-    return;
-  }
-  const paused = JSON.parse(localStorage.getItem(TIME_KEY))['seconds'];
-  if (paused) {
-    player
-      .setCurrentTime(paused)
-      .then(function (seconds) {})
-      .catch(function (error) {
-        switch (error.name) {
-          case 'Error':
-            break;
-          default:
-            break;
-        }
-      });
-  }
+function timeUpdate(data) {
+  localStorage.setItem('videoplayer-current-time', data.seconds);
 }
-resumePlayback();
+const parsedData = JSON.parse(localStorage.getItem('videoplayer-current-time'));
+console.log(parsedData);
+
+player
+  .setCurrentTime(parsedData)
+  .then(function (seconds) {})
+  .catch(function (error) {
+    switch (error.name) {
+      case 'RangeError':
+        // the time was less than 0 or greater than the video’s duration
+        break;
+
+      default:
+        // some other error occurred
+        break;
+    }
+  });

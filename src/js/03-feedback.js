@@ -1,40 +1,34 @@
-import '../css/common.css';
-import '../css/03-feedback.css';
 import throttle from 'lodash.throttle';
+const formEl = document.querySelector('.feedback-form');
+const emailEl = document.querySelector('[name="email"]');
+const messageEl = document.querySelector('[name="message"]');
 
-const STORAGE_KEY = 'feedback-form-state';
-const refs = {
-  form: document.querySelector('.feedback-form'),
-  textarea: document.querySelector('.feedback-form textarea'),
-  input: document.querySelector('input'),
-};
-const formData = {};
+let feedbackData;
+emailEl.addEventListener('input', throttle(feedbackText, 500));
+messageEl.addEventListener('input', throttle(feedbackText, 500));
 
-populateTextarea();
-
-refs.form.addEventListener('input', throttle(onTextareaInput, 500));
-
-refs.form.addEventListener('submit', e => {
-  e.preventDefault();
-  e.currentTarget.reset();
-  const objData = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  localStorage.removeItem(STORAGE_KEY);
-});
-
-function onTextareaInput(e) {
-  formData[e.target.name] = e.target.value;
-  const stringifiedData = JSON.stringify(formData);
-  localStorage.setItem(STORAGE_KEY, stringifiedData);
+function feedbackText() {
+  localStorage.setItem(
+    'feedback-form-state',
+    JSON.stringify({
+      email: emailEl.value,
+      message: messageEl.value,
+    }),
+  );
+  feedbackData = JSON.parse(localStorage.getItem('feedback-form-state'));
 }
 
-function populateTextarea() {
-  const savedMessage = JSON.parse(localStorage.getItem(STORAGE_KEY));
-
-  if (savedMessage === null) {
-    //console.log(savedMessage);
-    return;
-  }
-  refs.textarea.value = savedMessage['message'] || '';
-  refs.input.value = savedMessage['email'] || '';
+if (localStorage.getItem('feedback-form-state')) {
+  feedbackData = JSON.parse(localStorage.getItem('feedback-form-state'));
+  emailEl.value = feedbackData.email;
+  messageEl.value = feedbackData.message;
 }
-// Cons
+
+formEl.addEventListener('submit', resetStorage);
+
+function resetStorage(event) {
+  event.preventDefault();
+  console.log(feedbackData);
+  formEl.reset();
+  localStorage.clear();
+}

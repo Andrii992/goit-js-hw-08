@@ -1,32 +1,26 @@
-import { galleryItems } from './gallery-items';
 import SimpleLightbox from 'simplelightbox';
+import { galleryItems } from './gallery-items';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import '../css/common.css';
-import '../css/01-gallery.css';
+// Change code below this line
 
-const createItemsMarkup = galleryItems
-  .map(({ preview, original, description }) => {
-    return `
-    <a class="gallery__item" href="${original}">
-    <img class="gallery__image" src="${preview}" alt="${description}" />
-  </a>
-      `;
-  })
-  .join('');
+const galleryEl = document.querySelector('.gallery');
 
-const galleryContainerEl = document.querySelector('.gallery');
-galleryContainerEl.insertAdjacentHTML('beforeend', createItemsMarkup);
-let lightbox = new SimpleLightbox('.gallery a', {
-  scrollZoom: false,
-  captionDelay: 250,
+const createGalleryElements = function () {
+  return galleryItems
+    .map(
+      ({ preview, original, description }) =>
+        `
+          <a class="gallery__item" href="${original}">
+            <img class="gallery__image" src="${preview}" alt="${description}" />
+          </a>
+        `,
+    )
+    .join('');
+};
+galleryEl.insertAdjacentHTML('afterbegin', createGalleryElements(galleryItems));
+
+let gallery = new SimpleLightbox('.gallery a', {
+  captions: true,
   captionsData: 'alt',
-  doubleTapZoom: 1,
+  captionDelay: 250,
 });
-galleryContainerEl.addEventListener('click', event => {
-  event.preventDefault();
-  if (!event.target.classList.contains('gallery__image')) {
-    return;
-  }
-});
-
-//console.log(galleryItems);
